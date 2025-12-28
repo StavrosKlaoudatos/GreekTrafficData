@@ -1,0 +1,39 @@
+name: Fetch Hellastron Traffic Data
+
+# Trigger on a schedule; the cron syntax uses UTC. This example runs once every hour (at minute 0).
+on:
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          persist-credentials: true  # Needed so we can push changes using GITHUB_TOKEN
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Run fetcher
+        run: python fetch_latest.py
+
+      - name: Commit and push changes
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          # Check if there are changes; commit and push if yes
+          if git diff --quiet; then
+            echo "No changes to commit"
+          else
+            git add toll_data.csv
+            git commit -m "Update toll data $(date -u)"
+            git push
+          fi

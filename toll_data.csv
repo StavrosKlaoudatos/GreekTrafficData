@@ -1,0 +1,2 @@
+# This file will accumulate Hellastron traffic records.
+# Each row: motorway,date,hour,station,direction,light_count,heavy_count,none
