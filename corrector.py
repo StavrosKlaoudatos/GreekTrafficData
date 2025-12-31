@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 # Path to the CSV to correct (same as fetch_latest uses)
 HERE = os.path.dirname(__file__)
 IN_FILE = os.path.join(HERE, 'toll_data.csv')
-BACKUP_FILE = os.path.join(HERE, f'toll_data.csv.bak')
+BACKUP_FILE = os.path.join(HERE, f'toll_data.bak.csv')
 OUT_FILE = os.path.join(HERE, 'toll_data_fixed.csv')
 
 
