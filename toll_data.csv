@@ -1,5 +1,4 @@
-# This file will accumulate Hellastron traffic records.
-# Each row: motorway,date,hour,station,direction,light_count,heavy_count,none
+motorway,date,hour,station,direction,light_count,heavy_count,none
 ΑΙΓΑΙΟΥ,<20251228>,21,ΚΛΕΙΔΙ,ΑΘΗΝΑ,304,39,none
 ΑΙΓΑΙΟΥ,<20251228>,21,ΚΛΕΙΔΙ,ΘΕΣΣΑΛΟΝΙΚΗ,398,50,none
 ΑΙΓΑΙΟΥ,<20251228>,21,ΜΑΚΡΥΧΩΡΙ,ΑΘΗΝΑ,227,45,none
@@ -2967,3 +2966,4 @@
 ΟΛΥΜΠΙΑ_ΟΔΟΣ,<20251231>,9,ΙΣΘΜΟΣ,ΠΑΤΡΑ,785,107,none
 ΟΛΥΜΠΙΑ_ΟΔΟΣ,<20251231>,9,ΡΙΟ,ΑΘΗΝΑ,263,53,none
 ΟΛΥΜΠΙΑ_ΟΔΟΣ,<20251231>,9,ΡΙΟ,ΠΑΤΡΑ,376,62,none
+
