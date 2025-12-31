@@ -3,6 +3,7 @@ import csv
 import os
 from io import StringIO
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 # URL of the Hellastron "latest" feed
 URL = "https://hellastron.imet.gr/tollways/latest.csv"
@@ -11,12 +12,29 @@ OUT_FILE = os.path.join(os.path.dirname(__file__), 'toll_data.csv')
 
 
 def _try_parse_datetime(date_str, hour_str):
-    """Try to parse common date+hour formats and return an ISO-like string.
-    Falls back to the raw combined string if parsing fails.
+    """Parse date + hour into an ISO datetime string localized to Europe/Athens.
+    Returns a string suitable for pandas.to_datetime, e.g.:
+      '2025-12-31 15:00:00+02:00'
+    If parsing fails, returns the raw combined string.
     """
-    s = f"{(date_str or '').strip()} {(hour_str or '').strip()}".strip()
+    def _strip_angles(x):
+        if x is None:
+            return ''
+        x = str(x).strip()
+        # remove any surrounding angle brackets or stray < or > chars
+        return x.replace('<', '').replace('>', '').strip()
+
+    date_clean = _strip_angles(date_str)
+    hour_clean = _strip_angles(hour_str)
+    s = f"{date_clean} {hour_clean}".strip()
     if not s:
         return s
+    # normalize hour-only like '15' -> '15:00'
+    parts = s.split()
+    if len(parts) == 2 and parts[1].isdigit():
+        parts[1] = parts[1] + ':00'
+        s = ' '.join(parts)
+
     # Common formats seen in feeds: day/month/year and year-month-day, hours may be H or H:MM
     fmts = [
         "%d/%m/%Y %H:%M",
@@ -24,13 +42,32 @@ def _try_parse_datetime(date_str, hour_str):
         "%Y-%m-%d %H:%M",
         "%Y-%m-%d %H",
     ]
+
+    tz = ZoneInfo("Europe/Athens")
     for f in fmts:
         try:
             dt = datetime.strptime(s, f)
+            # attach Europe/Athens timezone (interpret feed times as local Greek time)
+            dt = dt.replace(tzinfo=tz)
+            # produce ISO-like string with offset and seconds, space-separated for pandas compatibility
             return dt.isoformat(sep=' ')
         except Exception:
             continue
-    # If none matched, return the raw combined string
+
+    # If none matched, still attempt a loose parse for simple patterns like YYYYMMDD
+    # e.g., '20251231 15' -> make it '2025-12-31 15:00:00+02:00'
+    try:
+        # try to extract numbers
+        date_part, hour_part = (parts[0], parts[1] if len(parts) > 1 else '0')
+        if len(date_part) == 8 and date_part.isdigit():
+            y = int(date_part[0:4]); m = int(date_part[4:6]); d = int(date_part[6:8])
+            h = int(hour_part.split(':')[0]) if hour_part else 0
+            dt = datetime(y, m, d, h, tzinfo=tz)
+            return dt.isoformat(sep=' ')
+    except Exception:
+        pass
+
+    # If all fails, return the raw combined string so no data is lost
     return s
 
 
